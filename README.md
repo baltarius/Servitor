@@ -1,4 +1,5 @@
 # Servitor
+
 Basic discord bot
 A simple Discord bot by a python learner to python learners.
 
@@ -10,6 +11,9 @@ bots on Discord. If you are to participate, please note that
 this is the main idea where we share the knowledge so people
 can learn with exemples and make experiences on their own.
 
+
+A HUGE thank you to the discord.py community is in order.
+You guys are the best!
 
 
 NOTE: if you installed python 3.13 or above, you have to perform this installation:
