@@ -45,3 +45,9 @@ How to get started (assuming you already installed python 3.9 or higher):
 - intercogs.py : used to store codes that will be used across other cogs
 
 ./database/servers : contains the databases per server ID
+
+
+Any additional cogs from the ./cogs folder are "add-ons" that are fully modular,
+which means that you can keep them or flush them at will. All the cogs have all
+the docstrings necessary to help you understand what they are used for. Feel free
+to edit those files to match your needs.
