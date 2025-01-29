@@ -1,0 +1,2 @@
+# Servitor
+Basic discord bot
