@@ -28,6 +28,14 @@ class Stats(commands.Cog, name="stats"):
 
     This class contains listeners and commands used for the stats system.
 
+    Functions:
+        update_stats()
+        update_level()
+        top_stats()
+        generate_stats()
+        generate_stats2()
+        generate_card()
+
     Commands:
         /setrole
         /stats
@@ -50,7 +58,6 @@ class Stats(commands.Cog, name="stats"):
         self.bot.tree.context_menu(name="level")(self.check_level)
         self.bot.tree.context_menu(name="stats2")(self.check_stats2)
         self.bot.tree.context_menu(name="all-stats")(self.all_stats)
-
 
 
     async def update_stats(
@@ -217,24 +224,6 @@ class Stats(commands.Cog, name="stats"):
         conn.close()
 
 
-    @setrole.error
-    async def setrole_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="stats",
         description="Displays the user's stats"
@@ -289,24 +278,6 @@ class Stats(commands.Cog, name="stats"):
             embed.add_field(name="User:", value=user, inline=False)
             await interaction.response.send_message(embed=embed, ephemeral=True)
             await add_achievement(interaction.guild.id, user.id, "Statistics")
-
-
-    @stats.error
-    async def stats_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
     @app_commands.command(
@@ -385,24 +356,6 @@ class Stats(commands.Cog, name="stats"):
         conn.close()
 
 
-    @leaderboard.error
-    async def leaderboard_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="level",
         description="Displays the user's level"
@@ -468,24 +421,6 @@ class Stats(commands.Cog, name="stats"):
             await add_achievement(interaction.guild.id, user.id, "Level")
 
 
-    @level.error
-    async def level_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="levelboard",
         description="Displays the Leaderboard for levels"
@@ -538,24 +473,6 @@ class Stats(commands.Cog, name="stats"):
         await interaction.response.send_message(embed=embed)
 
 
-    @levelboard.error
-    async def levelboard_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="reset_lvl",
         description="Resets a user's level"
@@ -588,24 +505,6 @@ class Stats(commands.Cog, name="stats"):
         conn.close()
         await interaction.response.send_message(
             content=f"{user}'s experience has been reset to 0.",
-            ephemeral=True
-        )
-
-
-    @reset_lvl.error
-    async def reset_lvl_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
             ephemeral=True
         )
 
@@ -647,24 +546,6 @@ class Stats(commands.Cog, name="stats"):
                 f"{exp} is out of range. Must be from 1 to 1000.",
                 ephemeral=True
             )
-
-
-    @addexp.error
-    async def addexp_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
     @commands.Cog.listener()
@@ -817,24 +698,6 @@ class Stats(commands.Cog, name="stats"):
             embed.add_field(name="User:", value=user, inline=False)
             await interaction.response.send_message(embed=embed, ephemeral=True)
             await add_achievement(interaction.guild.id, user.id, "Statistics 2")
-
-
-    @stats2.error
-    async def stats2_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
     async def top_stats(self, server_id, user_id):
@@ -1120,6 +983,7 @@ class Stats(commands.Cog, name="stats"):
 
         Args:
             guild as interaction.guild
+            member as discord.Member
 
         Returns:
             normal_stats as discord.Embed
@@ -1160,6 +1024,7 @@ class Stats(commands.Cog, name="stats"):
 
         Args:
             guild as interaction.guild
+            member as discord.Member
 
         Returns:
             average_stats as discord.Embed
@@ -1206,6 +1071,7 @@ class Stats(commands.Cog, name="stats"):
 
         Args:
             guild as interaction.guild
+            member as discord.Member
 
         Returns:
             member_card as discord.Embed
