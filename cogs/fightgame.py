@@ -24,13 +24,17 @@ class Fightgame(commands.Cog, name="fightgame"):
     This class contains commands, automatic database
     and ranking stats for the battles' system.
 
+    Functions:
+        combat()
+        user_fights()
+        format_fights()
+        
+
     Commands:
         /fight
         /battleboard
         /pending_fights
-
-    Args:
-        None
+        /remove_fighter
     """
     def __init__(self, bot):
         self.bot = bot
@@ -298,24 +302,6 @@ class Fightgame(commands.Cog, name="fightgame"):
         )
 
 
-    @fight.error
-    async def fight_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="battleboard",
         description="Battleboard for fight game scores"
@@ -379,25 +365,6 @@ class Fightgame(commands.Cog, name="fightgame"):
         embed.add_field(name="Top 10 scores", value=boardpoints, inline=True)
         embed.add_field(name="Top 10 games", value=boardgames, inline=True)
         await interaction.response.send_message(embed=embed)
-
-
-    @battleboard.error
-    async def battleboard_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
     async def user_fights(self, guild_id, user_id):
@@ -592,25 +559,6 @@ class Fightgame(commands.Cog, name="fightgame"):
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
-    @pending_fights.error
-    async def pending_fights_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="remove_fighter",
         description="Deletes battles of a member from the table"
@@ -634,25 +582,6 @@ class Fightgame(commands.Cog, name="fightgame"):
         conn.close()
         await interaction.response.send_message(
             content=f"{member} has been removed from the fights table.",
-            ephemeral=True
-        )
-
-
-    @remove_fighter.error
-    async def remove_fighter_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
             ephemeral=True
         )
 
