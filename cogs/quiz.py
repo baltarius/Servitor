@@ -8,7 +8,7 @@ database for the quiz to go on.
 
 DO NOT LOAD THIS COG IF YOU THE BOT IS
 ON OVER 100 SERVERS. THAT WOULD DRAIN A
-LOT OF RESSOURCES FROM THE ENVIRONMENT.
+LOT OF RESOURCES FROM THE ENVIRONMENT.
 
 Author: Elcoyote Solitaire
 """
@@ -34,8 +34,16 @@ class Quiz(commands.Cog, name="quiz"):
     This class contains commands, timers and
     automatic database for the quiz' system.
 
+    Functions:
+        load_quiz_data()
+        quiz_timer()
+        reset_quiz()
+        add_score_point()
+        generate_trivia()
+
     Commands:
-        /quiz
+        /quiz_start
+        /trivia
 
     Args:
         None
