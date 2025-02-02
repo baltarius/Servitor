@@ -44,9 +44,6 @@ class Quiz(commands.Cog, name="quiz"):
     Commands:
         /quiz_start
         /trivia
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
