@@ -29,6 +29,12 @@ class Anniversaries(commands.Cog, name="anniversaries"):
     This class contains commands, automatic functions
     and loops used for the server anniversaries system.
 
+    Functions:
+        is_valid_date()
+        has_today_anniv()
+        has_month_anniv()
+        hour_chan()
+
     Commands:
         /anniv
             - hour
@@ -36,9 +42,6 @@ class Anniversaries(commands.Cog, name="anniversaries"):
             - addmember
             - remove
             - list
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
@@ -446,96 +449,6 @@ class Anniversaries(commands.Cog, name="anniversaries"):
                 inline=False
             )
         await interaction.response.send_message(embed=embed, ephemeral=True)
-
-
-    @add.error
-    async def add_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @addmember.error
-    async def addmember_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @hour.error
-    async def hour_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @remove.error
-    async def remove_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @list.error
-    async def list_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
 
