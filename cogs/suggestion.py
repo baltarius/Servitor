@@ -41,12 +41,12 @@ class Suggestion(commands.Cog, name="suggestion"):
     This class contains commands, automatic functions
     and listeners used for the suggestion's system.
 
+    Listeners:
+        on_raw_reaction_add()
+
     Commands:
         /suggest
         /decision
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
@@ -132,24 +132,6 @@ class Suggestion(commands.Cog, name="suggestion"):
         await add_achievement(interaction.guild.id, user.id, "Suggestion")
         await interaction.response.send_message(
             content=f"Suggestion #{number} confirmed",
-            ephemeral=True
-        )
-
-
-    @suggest.error
-    async def suggest_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
             ephemeral=True
         )
 
@@ -319,25 +301,6 @@ class Suggestion(commands.Cog, name="suggestion"):
                     content=f"Suggestion #{sugg_id} has already been set as: {suggtable[3]}.",
                     ephemeral=True
                 )
-
-
-
-    @decision.error
-    async def decision_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
 
