@@ -27,13 +27,17 @@ class Punishment(commands.Cog, name="punishment"):
     This class contains commands, automatic functions
     and listeners used for the punishment's system.
 
+    Functions:
+        punishreq()
+        start_timer()
+        notify()
+        stop_timer()
+
     Commands:
+        /punish
         /setpunishreq
         /setpunishtime
         /punish
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
@@ -294,37 +298,6 @@ class Punishment(commands.Cog, name="punishment"):
             await self.start_timer(interaction, target.id, interaction.channel.id, message.id)
 
 
-    @punish.error
-    async def punish_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await interaction.response.send_message(
-                content="You don't have the permissions to use that command.",
-                ephemeral=True
-            )
-            return
-        if isinstance(error, app_commands.errors.CheckFailure):
-            await interaction.response.send_message(
-                content="I don't have the permissions to moderate members.",
-                ephemeral=True
-            )
-            return
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"Member not found. Please make sure you're mentioning it correctly.\n{error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="setpunishreq",
         description="Setup requirement for punishment"
@@ -365,24 +338,6 @@ class Punishment(commands.Cog, name="punishment"):
             )
 
 
-    @setpunishreq.error
-    async def setpunishreq_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="setpunishtime",
         description="Setup punishment length"
@@ -411,24 +366,6 @@ class Punishment(commands.Cog, name="punishment"):
         conn.close()
         await interaction.response.send_message(
             content=f"New length for punishment is {length} minutes.",
-            ephemeral=True
-        )
-
-
-    @setpunishtime.error
-    async def setpunishtime_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
             ephemeral=True
         )
 
