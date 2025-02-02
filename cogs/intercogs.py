@@ -3,7 +3,8 @@
 Functions use through the bot.
 
 This file is to store every functions that are used through the entire bot.
-The main function here is get_server_database.
+The main function here is get_server_database, which provides every other
+cogs to fetch datas from the database.
 
 Author: Elcoyote Solitaire
 """
@@ -22,13 +23,52 @@ class Intercogs(commands.Cog, name="intercogs"):
     Intercogs class for utilities.
 
     This class contains utility to be used through the bot's cogs.
-    Empty for now.
-    
+
+    Functions used through the bot:
+        - get_server_database
+        - add_achievement
+
+    Commands:
+        /showsetup
+        /exception
+        /settimezone
+        /achievements
+        /achieveboard
+        /setchan
+        /setalllogs
+        /member_option
+        /server_boards
+
     Args:
         None
     """
     def __init__(self, bot):
         self.bot = bot
+
+
+    #18
+    desc_achieves = {
+        "Application": "__**Application:**__ You used at least once an apps command",
+        "Awkward": "__**Awkward:**__ You created an error while using a command.",
+        "Belligerent": "__**Belligerent:**__ You used the fight command over 20 times.",
+        "Bold": "__**Bold:**__ You tried a command that was over your permissions.",
+        "Bot whisperer": "__**Bot whisperer:**__ You mentionned the bot at least 50 times.",
+        "Cooldown!": "__**Cooldown!:**__ You used a command twice too fast.",
+        "Feisty": "__**Feisty:**__ You used the fight command at least once.",
+        "Garrulous": "__**Garrulous:**__ You joined a voice chat over 20 times.",
+        "Happy birthday": "__**Happy birthday:**__ You added your birth day with /anniv add.",
+        "Hugaholic": "__**Hugaholic:**__ You used at least 20x /hug and/or /hug_anon",
+        "Level": "__**Level:**__ You checked your level or someone else's level at least once.",
+        "Profile": "__**Profile:**__ You checked your profile or someone else's at least once.",
+        "Statistics": "__**Statistics:**__ You checked your stats or someone else's at least "
+        "once.",
+        "Statistics 2": "__**Statistics 2:**__ You checked your stats2 or someone else's at "
+        "least once.",
+        "Suggestion": "__**Suggestion:**__ You submitted at least one suggestion with /suggest.",
+        "Teddy bear": "__**Teddy bear:**__ You used at least once /hug or /hug_anon.",
+        "Vocal": "__**Vocal:**__ You joined a vocal chat at least once.",
+        "Vote": "__**Vote:**__ You added a vote at least once to a suggestion."
+    }
 
 
     # USING THIS METHOD ALLOWS THE ADMIN TO ADD/CHANGE TABLES FROM
@@ -160,8 +200,47 @@ class Intercogs(commands.Cog, name="intercogs"):
             fight TEXT,
             kiss TEXT)''')
 
+        cur.execute('''CREATE TABLE IF NOT EXISTS quiz
+            (starter INTEGER PRIMARY KEY,
+            question TEXT,
+            answer TEXT,
+            timestamp TIMESTAMP)''')
+
+        cur.execute('''CREATE TABLE IF NOT EXISTS quiz_score
+            (id INTEGER PRIMARY KEY,
+            score INTEGER,
+            question INTEGER)''')
+
+        cur.execute('''CREATE TABLE IF NOT EXISTS thisorthat
+            (id INTEGER PRIMARY KEY,
+            answers TEXT,
+            current_question INTEGER)''')
+
+        cur.execute('''CREATE TABLE IF NOT EXISTS reddit_settings
+            (guild_id INTEGER PRIMARY KEY,
+            channel_id INTEGER,
+            sub TEXT,
+            last_post_ids TEXT,
+            on_off TEXT)''')
+
         conn.commit()
         return conn, cur
+
+
+    async def get_setup_chan_id(self, server_id, channel):
+        """
+        Fetch channel ID from the setup table
+
+        Args:
+            server_id as interaction.guild.id
+            channel as string for the name of the channel in setup
+        """
+        conn, cur = self.get_server_database(server_id)
+        cur.execute("SELECT id FROM SETUP WHERE chans = ?", (channel, ))
+        channel_result = cur.fetchone()
+        conn.close()
+        channel_id = channel_result[0] if channel_result else None
+        return channel_id
 
 
     # exception function to update the table is in the modlogs.py
@@ -364,8 +443,8 @@ class Intercogs(commands.Cog, name="intercogs"):
 
         setup_channels = [
             "audits", "edits", "users", "joins", "lefts", "alerts",
-            "logs", "level", "starboard", "analysis", "vote",
-            "welcome", "ticket", "voices", "anniv", "fight"
+            "logs", "level", "starboard", "analysis", "vote", "welcome",
+            "ticket", "voices", "anniv", "fight", "meme_fr", "meme_en"
         ]
         setup_roles = [
             "Level 10", "Level 20", "Level 30", "Level 40", "Level 50",
@@ -394,23 +473,6 @@ class Intercogs(commands.Cog, name="intercogs"):
                 )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-
-    @showsetup.error
-    async def showsetup_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
     @app_commands.command(
         name="exception",
@@ -481,24 +543,6 @@ class Intercogs(commands.Cog, name="intercogs"):
         conn.close()
 
 
-    @exception.error
-    async def exception_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="settimezone",
         description="Set the timezone"
@@ -561,24 +605,6 @@ class Intercogs(commands.Cog, name="intercogs"):
         )
 
 
-    @settimezone.error
-    async def settimezone_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="achievements",
         description="Shows your own achievements with description"
@@ -613,24 +639,6 @@ class Intercogs(commands.Cog, name="intercogs"):
         await interaction.response.send_message(
             content=f"Your achievements ({total_achieves}):\n{liste_descr}\n"
                 "\nPlease keep those informations a secret to keep this system entertaining.",
-            ephemeral=True
-        )
-
-
-    @achievements.error
-    async def achievements_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.CommandOnCooldown):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
-            await interaction.response.send_message(
-                content=error,
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
             ephemeral=True
         )
 
@@ -686,24 +694,6 @@ class Intercogs(commands.Cog, name="intercogs"):
         await interaction.response.send_message(embed=embed)
 
 
-    @achieveboard.error
-    async def achieveboard_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="setchan",
         description="Set log channel in database"
@@ -730,12 +720,15 @@ class Intercogs(commands.Cog, name="intercogs"):
         Choice(name="starboard", value=8),
         Choice(name="vote", value=9),
         Choice(name="welcome", value=10),
-        Choice(name="ticket", value=11),
+        Choice(name="anonyme", value=11),
         Choice(name="logs", value=12),
         Choice(name="voices", value=13),
         Choice(name="anniv", value=14),
         Choice(name="fight", value=15),
-        Choice(name="analysis", value=16)
+        Choice(name="analysis", value=16),
+        Choice(name="quiz", value=17),
+        Choice(name="meme_en", value=18),
+        Choice(name="meme_fr", value=19)
         # PLEASE MODIFY /SETALLLOGS CODE IF YOU MODIFY THIS PART
     ])
     async def setchan(
@@ -785,24 +778,6 @@ class Intercogs(commands.Cog, name="intercogs"):
         conn.close()
 
 
-    @setchan.error
-    async def setchan_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="setalllogs",
         description="Set all logs to a single chan"
@@ -832,7 +807,8 @@ class Intercogs(commands.Cog, name="intercogs"):
         conn, cur = self.get_server_database(interaction.guild.id)
         logtypes = [
             "audits", "edits", "users", "joins", "lefts", "alerts", "logs", "level", "starboard",
-            "vote", "welcome", "ticket", "voices", "anniv", "fight", "analysis"
+            "vote", "welcome", "anonyme", "voices", "anniv", "fight", "analysis", "quiz",
+            "meme_en", "meme_fr"
         ]
         for logtype in logtypes:
             cur.execute(
@@ -844,24 +820,6 @@ class Intercogs(commands.Cog, name="intercogs"):
             ephemeral=True
         )
         conn.close()
-
-
-    @setalllogs.error
-    async def setalllogs_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
     @app_commands.command(
@@ -947,6 +905,216 @@ class Intercogs(commands.Cog, name="intercogs"):
         )
 
 
+    async def generate_levelboard(self, guild):
+        """
+        generate the levelboard
+
+        Args:
+            guild as discord.Interaction.guild
+
+        Returns:
+            level as discord.Embed
+        """
+        conn, cur = get_server_database(guild.id)
+
+        cur.execute("SELECT id, level, exp FROM level ORDER BY total DESC LIMIT 10")
+        top_levels = cur.fetchall()
+        conn.close()
+
+        level = discord.Embed(title=f"Levelboard of {guild.name}", color=0x00ff00)
+        top_level_info = []
+        level.set_thumbnail(url=guild.icon)
+        for rank, (user_id, user_level, exp) in enumerate(top_levels, start=1):
+            member = self.bot.get_user(user_id)
+            exp_percentage = round(exp / 10, 2)
+            if member is not None:
+                member = member.display_name
+                top_level_info.append(f"{rank}: {member} - Level {user_level} ({exp_percentage}%)")
+            else:
+                member = f"<@{user_id}>"
+                top_level_info.append(f"{rank}: {member} - Level {user_level} ({exp_percentage}%)")
+            level.add_field(
+                name=f"{rank}: {member} - Lvl {user_level} ({exp_percentage}%)",
+                value="",
+                inline=False
+            )
+        return level
+
+
+    async def generate_leaderboard(self, guild):
+        """
+        generate the leaderboard
+
+        Args:
+            guild as discord.Interaction.guild
+
+        Returns:
+            leader as discord.Embed
+        """
+        conn, cur = get_server_database(guild.id)
+
+        highest_stats = {}
+        highest_stats_processed = {}
+        stat_name_mapping = {
+            'messages': 'Messages sent',
+            'words': 'Words written',
+            'characters': 'Characters written',
+            'emojis': 'Emojis used',
+            'reactions': 'Reactions',
+            'edited': 'Messages edited',
+            'deleted': 'Messages deleted',
+            'jvoice': 'Voice sessions',
+            'tvoice': 'Voice time',
+        }
+        columns = [
+            "messages", "words", "characters", "emojis", "reactions",
+            "edited", "deleted", "jvoice", "tvoice"
+        ]
+        for column in columns:
+            cur.execute(f"SELECT id, MAX({column}) FROM stats")
+            result = cur.fetchone()
+            highest_stats[column] = result
+        conn.close()
+
+        for column, (user_id, stats_value) in highest_stats.items():
+            member = self.bot.get_user(user_id)
+            if member is not None:
+                member_name = member.display_name
+            else:
+                member_name = f"<@{user_id}>"
+            if stats_value is not None and stats_value != 0:
+                highest_stats_processed[column.lower()] = f"{member_name} - {stats_value}"
+            else:
+                if column == "jvoice" or column == "tvoice":
+                    highest_stats_processed[column.lower()] = f"No vocal yet"
+                else:
+                    highest_stats_processed[column.lower()] = f"No {column} yet"
+
+        leader = discord.Embed(title=f"Leaderboard of {guild.name}", color=0x00ff00)
+        leader.set_thumbnail(url=guild.icon)
+        for stat_name, value in highest_stats_processed.items():
+            friendly_name = stat_name_mapping.get(
+                stat_name, stat_name.replace("_", " ").capitalize()
+            )
+            leader.add_field(name=friendly_name, value=value, inline=False)
+
+        return leader
+
+
+    async def generate_achieveboard(self, guild):
+        """
+        generate the achieveboard
+
+        Args:
+            guild as discord.Interaction.guild
+
+        Returns:
+            achieve as discord.Embed
+        """
+        conn, cur = get_server_database(guild.id)
+
+        cur.execute(
+            "SELECT id, COUNT(*) as num_achievements FROM achievements GROUP BY id"
+        )
+        topachieve = cur.fetchall()
+        conn.close()
+
+        achieve = discord.Embed(title=f"Achieveboard of {guild.name}", color=0x00ff00)
+        achieve.set_thumbnail(url=guild.icon)
+
+        sorted_rows = sorted(topachieve, key=lambda x: x[1], reverse=True)[:10]
+        for item in sorted_rows:
+            member = self.bot.get_user(int(item[0]))
+            if member is not None:
+                member = member.display_name
+            else:
+                member = f"<@{item[0]}>"
+            achieve.add_field(
+                name=f"{member}: {item[1]}",
+                value="",
+                inline=False
+            )
+
+        return achieve
+
+
+    async def generate_battleboard(self, guild):
+        """
+        generate the battleboard
+
+        Args:
+            guild as discord.Interaction.guild
+
+        Returns:
+            battle as discord.Embed
+        """
+        conn, cur = get_server_database(guild.id)
+
+        cur.execute("SELECT * FROM fightscore")
+        top_scores = cur.fetchall()
+        conn.close()
+
+        if not top_scores:
+            await interaction.response.send_message(
+                content="There is no score yet on this server for the fight system.",
+                ephemeral=True
+            )
+            return
+
+        battle = discord.Embed(title=f"Battleboard of {guild.name}", color=0x00ff00)
+        battle.set_thumbnail(url=guild.icon)
+
+        sorted_points = sorted(top_scores, key=lambda x: (-x[1], -x[2]))[:10]
+        boardpoints = ""
+        for item in sorted_points:
+            member = self.bot.get_user(int(item[0]))
+            if member is not None:
+                member = member.display_name
+            else:
+                member = f"<@{item[0]}>"
+            boardpoints += f"{member}: {item[1]} points\n"
+
+        sorted_games = sorted(top_scores, key=lambda x: (-x[2], -x[1]))[:10]
+        boardgames = ""
+        for item in sorted_games:
+            member = self.bot.get_user(int(item[0]))
+            if member is not None:
+                member = member.display_name
+            else:
+                member = f"<@{item[0]}>"
+            boardgames += f"{member}: {item[2]} games\n"
+
+        battle.add_field(name="Top 10 scores", value=boardpoints, inline=True)
+        battle.add_field(name="Top 10 games", value=boardgames, inline=True)
+        return battle
+
+
+    @app_commands.command(
+        name="server_boards",
+        description="Sends all the boards for the server"
+    )
+    @app_commands.guild_only()
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.describe()
+    async def server_boards(self, interaction: Interaction):
+        """
+        Function that sends embeds of all boards in the current channel.
+
+        This function sends the boards for the server:
+        levelboard, leaderboard, achieveboard, battleboard
+
+        Args:
+            interaction as discord.Interaction
+        """
+        level = await self.generate_levelboard(interaction.guild)
+        leader = await self.generate_leaderboard(interaction.guild)
+        achieve = await self.generate_achieveboard(interaction.guild)
+        battle = await self.generate_battleboard(interaction.guild)
+        embeds = [ level, leader, achieve, battle ]
+        await interaction.response.send_message(embeds=embeds)
+
+
+
 intercogs_instance = Intercogs(None)
 
 
@@ -955,6 +1123,13 @@ def get_server_database(server_id):
     Mirror function to be imported in other cogs.
     """
     return intercogs_instance.get_server_database(server_id)
+
+
+async def get_setup_chan_id(server_id, channel):
+    """
+    Mirror function to be imported in other cogs.
+    """
+    return await intercogs_instance.get_setup_chan_id(server_id, channel)
 
 
 async def add_achievement(server_id, user_id, achievement):
