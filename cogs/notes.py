@@ -33,9 +33,6 @@ class Notes(commands.Cog, name="notes"):
             - show
             - showtext
             - update
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
@@ -220,78 +217,6 @@ class Notes(commands.Cog, name="notes"):
         conn.close()
         await interaction.response.send_message(
             content=f"Note #{note} has been set as {notetype.name}.", ephemeral=True
-        )
-
-
-    @add.error
-    async def add_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @show.error
-    async def show_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @showtext.error
-    async def showtext_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @update.error
-    async def update_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
         )
 
 
