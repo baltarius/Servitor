@@ -19,7 +19,7 @@ from discord.ext import commands, tasks
 from discord.utils import get
 from cogs.intercogs import get_server_database, get_time_zone, add_achievement
 
-
+# add checks for permissions to manage roles, channels and permissions
 
 class Servstats(commands.Cog, name="servstats"):
     """
@@ -28,11 +28,11 @@ class Servstats(commands.Cog, name="servstats"):
     This class contains commands, automatic functions
     and loops used for the server statistics system.
 
+    Task loop:
+        channel_name_updater()
+
     Command:
         /createservstats
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
@@ -159,31 +159,6 @@ class Servstats(commands.Cog, name="servstats"):
             "channels_channel": channels_channel,
             "roles_channel": roles_channel
         }
-
-
-    @createservstats.error
-    async def createservstats_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        if isinstance(error, app_commands.CheckFailure):
-            await interaction.response.send_message(
-                content="I require permissions to manage roles, channels and permissions to "
-                    "perform that function.",
-                ephemeral=True
-            )
-            return
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
     async def wait_until_next_quarter(self):
