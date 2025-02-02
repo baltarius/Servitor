@@ -28,8 +28,13 @@ class Voice(commands.Cog, name="voice"):
 
     This class contains listeners to log and compile voice activities.
 
-    Args:
-        None
+    Functions:
+        voice_entry()
+        getemb()
+        entry_calc()
+
+    Listeners:
+        on_voice_state_update()
     """
     def __init__(self, bot):
         self.bot = bot
@@ -175,9 +180,9 @@ class Voice(commands.Cog, name="voice"):
             else:
                 await self.voice_entry(server_id, member.id, "None")
             await add_achievement(server_id, member.id, "Vocal")
-            count = await add_achievecount(message.guild.id, message.author.id, "Garrulous")
+            count = await add_achievecount(member.guild.id, member.id, "Garrulous")
             if count == 20:
-                await add_achievement(message.guild.id, message.author.id, "Garrulous")
+                await add_achievement(member.guild.id, member.id, "Garrulous")
 
         elif before.channel is not None and after.channel is not None:
             if before.channel != after.channel:
