@@ -37,7 +37,6 @@ class Analysis(commands.Cog, name="analysis"):
         self.activity_tracker.start()
 
 
-
     async def plot_activity(self, guild_id, time_zone, filename):
         """
         Creating image from a log file
