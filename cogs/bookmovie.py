@@ -24,15 +24,17 @@ class Bookmovie(commands.Cog, name="bookmovie"):
     Allows to find movie and book information
     from a title or from the ID of the media.
 
+    Functions:
+        get_info_by_isbn()
+        search_isbn_by_title()
+        parse_book_info()
+
     Commands:
         /book
 
         Group movie:
             - find_movieid
             - info
-
-    Args:
-        None
     """
     def __init__(self, bot):
         self.bot = bot
@@ -198,18 +200,6 @@ class Bookmovie(commands.Cog, name="bookmovie"):
         await interaction.edit_original_response(content=books)
 
 
-    @find_book.error
-    async def find_book_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     movie_group = Group(
         name="movie", description="Group of command for movies", guild_only=True
     )
@@ -277,6 +267,8 @@ class Bookmovie(commands.Cog, name="bookmovie"):
             plot = movie["plot outline"]
         except KeyError:
             plot = "Not available"
+        if len(plot) > 1000:
+            plot = plot[:1000] + ". . ."
         embed = discord.Embed(
             title=f"{title} - {year} ({movie_id})",
             color=0xFFD700,
@@ -299,30 +291,6 @@ class Bookmovie(commands.Cog, name="bookmovie"):
             inline=False
         )
         await interaction.edit_original_response(content="", embed=embed)
-
-
-    @find_movieid.error
-    async def find_movieid_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
-    @info.error
-    async def info_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
 
 
 
