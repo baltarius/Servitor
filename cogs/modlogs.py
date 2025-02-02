@@ -28,6 +28,22 @@ class Modlogs(commands.Cog, name="modlogs"):
 
     This class contains automatic functions
     and listeners used for the modlogs' system.
+
+    Functions:
+        is_a_bot_chan()
+
+    Listeners:
+        on_message_edit()
+        on_message_delete()
+        on_bulk_message_delete()
+        on_member_join()
+        on_member_remove()
+        on_member_ban()
+        on_member_update()
+        on_user_update()
+        on_guild_channel_create()
+        on_guild_channel_delete()
+        on_guild_channel_update()
     """
     def __init__(self, bot):
         self.bot = bot
@@ -340,7 +356,6 @@ class Modlogs(commands.Cog, name="modlogs"):
                             f"Reason: {reason}"
                         )
                         await leftschanname.send(embed=embedkick)
-
 
 
     @commands.Cog.listener()
