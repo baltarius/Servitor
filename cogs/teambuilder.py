@@ -189,25 +189,6 @@ class Teambuilder(commands.Cog, name="teambuilder"):
         await self.edit_team(guild, team_name)
 
 
-    @build_team.error
-    async def build_team_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     async def teams_autocomplete(self, interaction: Interaction, current: str):
         """Provide autocomplete options based on team names."""
         guild = interaction.guild.id
@@ -326,25 +307,6 @@ class Teambuilder(commands.Cog, name="teambuilder"):
             )
 
 
-    @join_team.error
-    async def join_team_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="switch_member",
         description="Switch a member to another team/position"
@@ -437,25 +399,6 @@ class Teambuilder(commands.Cog, name="teambuilder"):
         await self.edit_team(guild, new_team)
 
 
-    @switch_member.error
-    async def switch_member_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="remove_team",
         description="Remove the entire team from the list"
@@ -489,25 +432,6 @@ class Teambuilder(commands.Cog, name="teambuilder"):
         )
 
 
-    @remove_team.error
-    async def remove_team_error(self, interaction, error):
-        """
-        Returns any error as a reply to any command.
-        """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
-            await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
-                ephemeral=True
-            )
-            return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
-
-
     @app_commands.command(
         name="print_teams",
         description="Dev command to see the nested dictionaries self.teams"
@@ -528,23 +452,59 @@ class Teambuilder(commands.Cog, name="teambuilder"):
         await interaction.response.send_message(content=self.teams, ephemeral=True)
 
 
-    @print_teams.error
-    async def print_teams_error(self, interaction, error):
+    @app_commands.command(
+        name="leave_team",
+        description="Leave a team"
+    )
+    @app_commands.guild_only()
+    @app_commands.describe(team_name="Name of the team to leave")
+    @app_commands.autocomplete(team_name=teams_autocomplete)
+    async def leave_team(self, interaction: Interaction, team_name: str):
         """
-        Returns any error as a reply to any command.
+        Leave a team you joined
+
+        Args:
+            interaction as discord.Interaction
+            team_name as autocompletion for team in self.teams
+
+        Uses:
+            edit_team()
         """
-        if isinstance(error, app_commands.errors.MissingPermissions):
-            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
+        guild = interaction.guild.id
+        if team_name not in self.teams[guild]:
             await interaction.response.send_message(
-                content="You don't have the permission to use this command.",
+                content=f"There's no team `{team_name}`",
                 ephemeral=True
             )
             return
-        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
-        await interaction.response.send_message(
-            content=f"An error occurred: {error}",
-            ephemeral=True
-        )
+
+        team = self.teams[guild][team_name]["positions"]
+        found = False
+        position_left = None
+
+        for position, slots in team.items():
+            for i in range(len(slots)):
+                if slots[i] == interaction.user.display_name:
+                    slots[i] = None
+                    found = True
+                    position_left = position
+                    break
+            if found:
+                break
+
+        if not found:
+            await interaction.response.send_message(
+                content=f"You are not in `{team_name}`.",
+                ephemeral=True
+            )
+            return
+
+        is_message = await self.edit_team(guild, team_name)
+        if is_message:
+            await interaction.response.send_message(
+                content=f"You have successfully left team `{team_name}`!",
+                ephemeral=True
+            )
 
 
 
