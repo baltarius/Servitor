@@ -16,8 +16,11 @@ import random
 import sys
 import discord
 
-from discord.ext import commands, tasks
+from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
+from discord import app_commands
+from discord.ext import commands, tasks
+from cogs.intercogs import add_achievement
 
 
 if not os.path.isfile("config.json"):
@@ -49,8 +52,10 @@ class MyBot(commands.Bot):
             command_prefix=commands.when_mentioned_or(config["prefix"]),
             intents=intents
         )
+        self.original_app_error = self.tree.on_error
+        self.tree.on_error = self.on_app_command_error
 
-
+    
     def count_lines(self, file_path):
         with open(file_path, 'r', encoding='utf-8') as file:
             line_count = sum(1 for line in file)
@@ -138,6 +143,79 @@ class MyBot(commands.Bot):
             )
 
 
+    async def on_app_command_error(
+        self, interaction: discord.Interaction[commands.Bot], error: app_commands.AppCommandError,
+    ) -> None:
+        """
+        Global error handler for application commands.
+        """
+        if isinstance(error, app_commands.errors.MissingPermissions):
+            await add_achievement(interaction.guild.id, interaction.user.id, "Bold")
+            await interaction.response.send_message(
+                content="You don't have the permission to use this command.",
+                ephemeral=True
+            )
+            return
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await add_achievement(interaction.guild.id, interaction.user.id, "Cooldown!")
+            cooldown_seconds = error.retry_after
+            hours = int(cooldown_seconds // 3600)
+            minutes = int((cooldown_seconds % 3600) // 60)
+            seconds = int(cooldown_seconds % 60)
+            cooldown_message = "You are on cooldown. Try again in "
+            if hours > 0:
+                cooldown_message += f"{hours}h "
+            if minutes > 0:
+                cooldown_message += f"{minutes}m "
+            cooldown_message += f"{seconds}s."
+            await interaction.response.send_message(
+                content=cooldown_message,
+                ephemeral=True
+            )
+            return
+        if isinstance(error, app_commands.errors.MissingRole):
+            await interaction.response.send_message(
+                "You do not have the required role to use this command.",
+                ephemeral=True
+            )
+            return
+        if isinstance(error, app_commands.errors.CheckFailure):
+            await interaction.response.send_message(
+                "I don't have the permissions to perform that command.",
+                ephemeral=True
+            )
+            return
+        if isinstance(error, app_commands.errors.CommandNotFound):
+            await interaction.response.send_message(
+                "This command does not exist.",
+                ephemeral=True
+            )
+            return
+        if isinstance(error, app_commands.errors.CommandInvokeError):
+            await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
+            await interaction.response.send_message(
+                "An internal error occurred while executing the command.",
+                ephemeral=True
+            )
+            print(f"Unexpected error: {error}")
+            return
+        if isinstance(error, app_commands.errors.BotMissingPermissions):
+            await interaction.response.send_message(
+                "I don't have the required permissions to run this command!",
+                ephemeral=True
+            )
+            return
+        await add_achievement(interaction.guild.id, interaction.user.id, "Awkward")
+        await interaction.response.send_message(
+            content=f"An error occurred: {error}",
+            ephemeral=True
+        )
+        print(
+            f"{datetime.now().strftime('%H:%M:%S')} - Error in {interaction.guild.name}\n"
+            f"User: {interaction.user.display_name}\nError: {error}"
+        )
+
+
 def main():
     """
     Starts the bot and the logs system (discord.log)
@@ -162,11 +240,9 @@ def main():
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-
+    bot = MyBot()
     bot.run(token, log_handler=handler)
 
-
-bot = MyBot()
 
 
 if __name__ == "__main__":
