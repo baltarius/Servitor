@@ -11,6 +11,36 @@ import os
 import linecache
 
 
+def find_project_frame(exc_tb, project_root, python_install_path, venv_path):
+    """
+    Finds the last line of error from the traceback
+
+    Makes sure the lines are from your project's files
+    ignoring libraries and virtual environment (venv)
+
+    Returns:
+        inner_frame as str for the last line of error
+    """
+    tb_frames = []
+    tb_frame = exc_tb
+    while tb_frame:
+        tb_frames.append(tb_frame)
+        tb_frame = tb_frame.tb_next
+
+    inner_frame = tb_frames[-1]
+    frame = inner_frame.tb_frame
+    filename = os.path.abspath(frame.f_code.co_filename)
+
+    if filename.startswith(project_root):
+        return inner_frame
+    else:
+        for tb_frame in reversed(tb_frames):
+            frame = tb_frame.tb_frame
+            filename = os.path.abspath(frame.f_code.co_filename)
+            if filename.startswith(project_root):
+                return tb_frame
+        return inner_frame
+
 def custom_excepthook(exc_type, exc_value, exc_tb):
     """
     Custom exception hook for a better, more concise display of the traceback
@@ -29,29 +59,26 @@ def custom_excepthook(exc_type, exc_value, exc_tb):
     python_install_path = os.path.abspath(sys.base_prefix)
     venv_path = os.path.abspath(sys.prefix)
 
-    tb_frame = exc_tb
-    while tb_frame:
-        frame = tb_frame.tb_frame
-        filename = os.path.abspath(frame.f_code.co_filename)
+    project_root = os.path.abspath(os.getcwd())  # or the actual path to your project
 
-        if not filename.startswith(python_install_path) and not filename.startswith(venv_path):
-            lineno = tb_frame.tb_lineno
-            function = frame.f_code.co_name
-            try:
-                with open(filename, "r", encoding="utf-8") as code:
-                    lines = code.readlines()
-                    code_line = lines[lineno - 1].strip()
-            except Exception as err_code:
-                code_line = f"Could not read code line: {err_code}"
+    tb_frame = find_project_frame(exc_tb, project_root, python_install_path, venv_path)
+    frame = tb_frame.tb_frame
+    filename = os.path.abspath(frame.f_code.co_filename)
+    lineno = tb_frame.tb_lineno
+    function = frame.f_code.co_name
 
-            print(f"Full path: {filename}")
-            print(f"File: {os.path.basename(filename)}")
-            print(f"Function: {function}")
-            print(f"Line number: {lineno}")
-            print(f"Line of code: {code_line}\n")
+    try:
+        with open(filename, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            code_line = lines[lineno - 1].strip()
+    except Exception as e:
+        code_line = f"Could not read code line: {e}"
 
-            break
-        tb_frame = tb_frame.tb_next
+    print(f"Full path: {filename}")
+    print(f"File: {os.path.basename(filename)}")
+    print(f"Function: {function}")
+    print(f"Line number: {lineno}")
+    print(f"Line of code: {code_line}")
 
     if exc_type is AttributeError:
         try:
