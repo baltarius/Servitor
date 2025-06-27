@@ -113,35 +113,19 @@ class MyBot(commands.Bot):
         
         Half/half chance to get a random status or random custom activity.
         """
+        self.config = load_configs()
         bot_presence = random.choice([True, False])
-        statuses = [
-            "I am a ro...application",
-            "Bin there, bot that.",
-            "Delicious bot: app-etizer",
-            "I'm the alpha and omg",
-            "Playing-yang"
-        ]
-        playing = [
-            "The song of my people",
-            "In my sandbox",
-            "Tic-tac-toe with 0s and 1s",
-            "Hide & seek with bugs",
-            "Python and ladders",
-            "or not playing...",
-            "monopoly, losing friends",
-            "Clue with mr. White in the studio",
-            "Skribbl.idiot",
-            "Gartic not fun",
-            "Scrabble in binary",
-            "Notepad PvP mode",
-            "Fax and furious"
-        ]
-        if bot_presence:
-            await self.change_presence(activity=discord.Game(random.choice(playing)))
+        playing = self.config.get("custom_statuses", [])
+        statuses = self.config.get("playing_statuses", [])
+        if not playing or not statuses:
+            await self.change_presence(activity=discord.Game("loading status from config . . ."))
         else:
-            await self.change_presence(
-                activity=discord.CustomActivity(name=random.choice(statuses))
-            )
+            if bot_presence:
+                await self.change_presence(activity=discord.Game(random.choice(playing)))
+            else:
+                await self.change_presence(
+                    activity=discord.CustomActivity(name=random.choice(statuses))
+                )
 
 
     async def on_app_command_error(
