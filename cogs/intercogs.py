@@ -9,7 +9,6 @@ cogs to fetch datas from the database.
 Author: Elcoyote Solitaire
 """
 import datetime
-import os
 import sqlite3
 import pytz
 import discord
@@ -89,7 +88,6 @@ class Intercogs(commands.Cog, name="intercogs"):
             server_id as guild.id
         """
         db_file = f"./database/servers/{server_id}.db"
-        os.makedirs("./database/servers", exist_ok=True)
         conn = sqlite3.connect(db_file)
         cur = conn.cursor()
 
