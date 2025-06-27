@@ -48,7 +48,7 @@ How to get started (assuming you already installed python 3.9 or higher):
 - cogsmanager.py : used to load/reload/unload cog files and !sync commands
 - intercogs.py : used to store codes that will be used across other cogs
 
-./database/servers : contains the databases per server ID
+./database/servers : contains the databases per server ID (created upon launch if it doesn't exist)
 
 
 Any additional cogs from the ./cogs folder are "add-ons" that are fully modular,
