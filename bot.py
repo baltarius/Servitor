@@ -17,6 +17,7 @@ import sys
 import discord
 
 from logging.handlers import RotatingFileHandler
+from datetime import datetime
 from dotenv import load_dotenv
 from discord import app_commands
 from discord.ext import commands, tasks
