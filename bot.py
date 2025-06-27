@@ -45,6 +45,9 @@ if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
 
 
+os.makedirs("./database/servers", exist_ok=True)
+
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
