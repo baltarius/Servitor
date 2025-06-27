@@ -1,8 +1,26 @@
 {
   "prefix": "!",
-  "token": "",
-  "permissions": "8",
-  "application_id": "",
-  "sync_commands_globally": true,
-  "owners": [ ]
+  "status_interval_minutes": 10,
+  "custom_statuses": [
+    "I am a ro...application",
+    "Bin there, bot that.",
+    "Delicious bot: app-etizer",
+    "I'm the alpha and omg",
+    "Playing-yang"
+  ],
+  "playing_statuses": [
+    "The song of my people",
+    "In my sandbox",
+    "Tic-tac-toe with 0s and 1s",
+    "Hide & seek with bugs",
+    "Python and ladders",
+    "or not playing...",
+    "monopoly, losing friends",
+    "Clue with mr. White in the studio",
+    "Skribbl.idiot",
+    "Gartic not fun",
+    "Scrabble in binary",
+    "Notepad PvP mode",
+    "Fax and furious"
+  ]
 }
