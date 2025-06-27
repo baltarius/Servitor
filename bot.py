@@ -24,11 +24,25 @@ from discord.ext import commands, tasks
 from cogs.intercogs import add_achievement
 
 
-if not os.path.isfile("config.json"):
-    sys.exit("'config.json' not found! Please add it and try again.")
-else:
+def load_configs():
+    """
+    Allow to load configs from config.json
+    on start, then reload at intervals
+
+    Returns:
+        config:
+            [prefix]
+            [status_interval_minutes]
+            [custom_statuses]
+            [playing_statuses]
+    """
     with open("config.json", "r", encoding="utf-8") as jsonfile:
         config = json.load(jsonfile)
+        return config
+
+
+if not os.path.isfile("config.json"):
+    sys.exit("'config.json' not found! Please add it and try again.")
 
 
 intents = discord.Intents.default()
@@ -49,6 +63,8 @@ class MyBot(commands.Bot):
         help_command: The custom help command instance.
     """
     def __init__(self, help_command=None):
+        self.config = config
+        self.status_interval = status_interval
         super().__init__(
             command_prefix=commands.when_mentioned_or(config["prefix"]),
             intents=intents
@@ -225,6 +241,8 @@ def main():
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    config = load_configs()
+    status_interval = config.get("status_interval_minutes", 10)
     bot = MyBot()
     bot.run(token, log_handler=handler)
 
