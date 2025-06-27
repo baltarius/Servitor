@@ -8,10 +8,12 @@ cogs to fetch datas from the database.
 
 Author: Elcoyote Solitaire
 """
+import datetime
 import sqlite3
 import pytz
 import discord
 
+from datetime import datetime, timezone, timedelta
 from discord import app_commands, Interaction
 from discord.ext import commands
 from discord.app_commands import Choice
