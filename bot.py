@@ -62,7 +62,7 @@ class MyBot(commands.Bot):
         intents (discord.Intents): The intents for the bot.
         help_command: The custom help command instance.
     """
-    def __init__(self, help_command=None):
+    def __init__(self, config, status_interval, help_command=None):
         self.config = config
         self.status_interval = status_interval
         super().__init__(
@@ -243,7 +243,7 @@ def main():
     logger.addHandler(handler)
     config = load_configs()
     status_interval = config.get("status_interval_minutes", 10)
-    bot = MyBot()
+    bot = MyBot(config, status_interval)
     bot.run(token, log_handler=handler)
 
 
