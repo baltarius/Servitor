@@ -136,8 +136,8 @@ class MyBot(commands.Bot):
         """
         self.config = load_configs()
         bot_presence = random.choice([True, False])
-        playing = self.config.get("custom_statuses", [])
-        statuses = self.config.get("playing_statuses", [])
+        statuses = self.config.get("custom_statuses", [])
+        playing = self.config.get("playing_statuses", [])
         if not playing or not statuses:
             await self.change_presence(activity=discord.Game("loading status from config . . ."))
         else:
