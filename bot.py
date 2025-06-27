@@ -46,11 +46,13 @@ if not os.path.isfile("config.json"):
 
 
 os.makedirs("./database/servers", exist_ok=True)
+os.makedirs("./cogs", exist_ok=True)
 
 
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
+
 
 
 class MyBot(commands.Bot):
