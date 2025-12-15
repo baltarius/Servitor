@@ -37,10 +37,10 @@ How to get started (assuming you already installed python 3.9 or higher):
 
 
 
-./ : all the primary files, which should not be modified except for the token and the prefix
+./ : all the primary files, which should not be modified except for the token, the prefix, and statuses
 - .env : contains your bot's TOKEN
 - bot.py : the main file to start the bot
-- config.json : contains mainly the prefix used by the bot
+- config.json : contains the prefix and statuses with intervals used by the bot
 - README.md : Gets you started
 - requirements.txt : used with "pip install -r requirements" to install all dependencies at once
 
