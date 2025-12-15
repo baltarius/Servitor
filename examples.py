@@ -236,7 +236,7 @@ class Examples(commands.Cog, name="examples"):
     # Declaring a new group of commands.
     # See the link below for the documentation:
     # https://discordpy.readthedocs.io/en/stable/interactions/api.html?highlight=app_commands%20group#discord.app_commands.Group
-    anniv_group = Group(
+    admin_group = Group(
         name="admin",
         description="Group of command for admin",
         guild_only=True,
@@ -280,3 +280,4 @@ async def setup(bot):
     Loads the cog on start.
     """
     await bot.add_cog(Examples(bot))
+
