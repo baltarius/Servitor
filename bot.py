@@ -105,7 +105,6 @@ class MyBot(commands.Bot):
                     exception = f"{type(extension_failed).__name__}: {extension_failed}"
                     print(f"Failed to load extension {extension}\n{exception}")
         print(f"¤¤¤ {totallines} lines of codes for {totalextensions} extensions ¤¤¤")
-        #self.add_view(PersistentView())
 
 
     async def on_ready(self):
@@ -133,6 +132,8 @@ class MyBot(commands.Bot):
         Setup the game status task of the bot
         
         Half/half chance to get a random status or random custom activity.
+        The status are located in the config.json, so they can be updated
+        while the bot is running without any issue.
         """
         self.config = load_configs()
         bot_presence = random.choice([True, False])
@@ -225,20 +226,31 @@ class MyBot(commands.Bot):
 def main():
     """
     Starts the bot and the logs system (discord.log)
+
+    This part will get the token from the .env file, then
+    use it to log the bot online (bot.run(token)).
+    It also includes a logging script to keep track of any
+    issue that the bot could encounter, which is crucial 
+    for development.
+
+    There's also a setup for the status intervals, which is
+    10 minutes per default, but can be changed in the file
+    config.json.
     """
-    # get token from .env file
     load_dotenv()
     token = os.getenv('DISCORD_TOKEN')
 
     logger = logging.getLogger('discord')
     logger.setLevel(logging.WARNING)
     logging.getLogger('discord.http').setLevel(logging.WARNING)
+    #use logging.INFO instead of logging.WARNING for less
+    #useless log entries in the discord.log file
 
     handler = logging.handlers.RotatingFileHandler(
         filename='discord.log',
         encoding='utf-8',
-        maxBytes=32 * 1024 * 1024,  # 32 MiB
-        backupCount=5,  # Rotate through 5 files
+        maxBytes=32 * 1024 * 1024,  #32 MiB
+        backupCount=5,  #Rotate through 5 files
     )
     dt_fmt = '%Y-%m-%d %H:%M:%S'
     formatter = logging.Formatter(
@@ -255,3 +267,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
