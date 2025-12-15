@@ -81,11 +81,19 @@ class Examples(commands.Cog, name="examples"):
         See the link below to find the documentation about the Message class:
         https://discordpy.readthedocs.io/en/stable/api.html?highlight=on_message#discord.Message
         """
+        #you usually don't want to be triggered by other bots, so use this next "if" statement.
+        if message.author.bot:
+            return
         the_text = message.content
         author = message.author
         channel = message.channel
+        #use await and self when calling an async function from your class.
+        #if your function returns something, then create a variable out of
+        #you function, using this line:
+        #awesome_variable = await self.my_function()
+        await self.my_function()
 
-
+    
     # Here's a few listeners available:
     # on_message_edit(before, after)
     # on_message_delete(message)
@@ -280,4 +288,5 @@ async def setup(bot):
     Loads the cog on start.
     """
     await bot.add_cog(Examples(bot))
+
 
