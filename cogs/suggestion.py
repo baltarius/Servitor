@@ -22,12 +22,10 @@ time of creation in discord.
 Author: Elcoyote Solitaire
 """
 import asyncio
-import pytz
 import discord
 
 from datetime import datetime
 from discord import app_commands, Interaction
-from discord.utils import get
 from discord.ext import commands
 from discord.app_commands import Choice
 from cogs.intercogs import get_server_database, get_time_zone, add_achievement
@@ -151,35 +149,38 @@ class Suggestion(commands.Cog, name="suggestion"):
             return
         guild = self.bot.get_guild(payload.guild_id)
         channel = guild.get_channel_or_thread(payload.channel_id)
-        if isinstance(channel, discord.Thread):
+        if isinstance(channel, discord.Thread) or str(channel.type) != "text":
             return
-        message = await channel.fetch_message(payload.message_id)
-        reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
-        user = guild.get_member(payload.user_id)
         conn, cur = get_server_database(guild.id)
         cur.execute("SELECT * FROM suggestion WHERE id = ?", (payload.message_id,))
         row = cur.fetchone()
         conn.close()
-        if row:
-            await add_achievement(guild.id, user.id, "Vote")
-            if reaction.emoji == "⬆️":
-                down_reaction = discord.utils.get(message.reactions, emoji="⬇️")
-                if down_reaction:
-                    users = down_reaction.users()
-                    async for member in users:
-                        if member == user:
-                            # The user has already reacted with ⬇️, so remove their reaction
-                            await reaction.remove(user)
-                            break
-            elif reaction.emoji == "⬇️":
-                up_reaction = discord.utils.get(message.reactions, emoji="⬆️")
-                if up_reaction:
-                    users = up_reaction.users()
-                    async for member in users:
-                        if member == user:
-                            # The user has already reacted with ⬆️, so remove their reaction
-                            await reaction.remove(user)
-                            break
+        if not row:
+            return
+        message = await channel.fetch_message(payload.message_id)
+        reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
+        user = guild.get_member(payload.user_id)
+        await add_achievement(guild.id, user.id, "Vote")
+        if reaction.emoji == "⬆️":
+            down_reaction = discord.utils.get(message.reactions, emoji="⬇️")
+            if not down_reaction:
+                return
+            users = down_reaction.users()
+            async for member in users:
+                if member == user:
+                    # The user has already reacted with ⬇️, so remove their reaction
+                    await reaction.remove(user)
+                    return
+        elif reaction.emoji == "⬇️":
+            up_reaction = discord.utils.get(message.reactions, emoji="⬆️")
+            if not up_reaction:
+                return
+            users = up_reaction.users()
+            async for member in users:
+                if member == user:
+                    # The user has already reacted with ⬆️, so remove their reaction
+                    await reaction.remove(user)
+                    return
 
 
     @app_commands.command(
@@ -309,3 +310,4 @@ async def setup(bot):
     Loads the cog on start.
     """
     await bot.add_cog(Suggestion(bot))
+
