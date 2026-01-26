@@ -161,7 +161,7 @@ def custom_excepthook(exc_type, exc_value, exc_tb):
             for file in same_ext_files:
                 print(f"  - {file}")
         else:
-            print("🔎 No files found with the same extension.")
+            print("No files found with the same extension.")
 
     print("\n===== End of Custom Exception Handler =====\n")
 
