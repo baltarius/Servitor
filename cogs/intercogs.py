@@ -446,33 +446,50 @@ class Intercogs(commands.Cog, name="intercogs"):
         setup_channels = [
             "audits", "edits", "users", "joins", "lefts", "alerts",
             "logs", "level", "starboard", "analysis", "vote", "welcome",
-            "ticket", "voices", "anniv", "fight", "meme_fr", "meme_en"
+            "ticket", "voices", "anniv", "fight", "meme_fr", "meme_en",
+            "suggestion", "quiz"
         ]
         setup_roles = [
             "Level 10", "Level 20", "Level 30", "Level 40", "Level 50",
-            "Level 60", "Level 70", "Level 80", "Level 90", "Level 100"
+            "Level 60", "Level 70", "Level 80", "Level 90", "Level 100", "Ascended"
         ]
+        setup_punish = [ "punishtime", "punishreq", "hour" ]
         embed = discord.Embed(
             color=0xFFC0CB,
             title=f"List of the setup for {interaction.guild.name}",
-            description="Setup: Channel"
+            description=""
         )
+        channels, roles, punishment, others = ("", "", "", "")
         for chan in rows:
             if chan[0] in setup_channels:
-                embed.add_field(
-                    name="",
-                    value=f"{chan[0]}: <#{chan[1]}>\n", inline=False
-                )
+                channels += f"{chan[0]}: <#{chan[1]}>\n"
             elif chan[0] in setup_roles:
-                embed.add_field(
-                    name="",
-                    value=f"{chan[0]}: <@&{chan[1]}>\n", inline=False
-                )
+                roles += f"{chan[0]}: <@&{chan[1]}>\n"
+            elif chan[0] in setup_punish:
+                punishment += f"{chan[0]}: {chan[1]}\n"
             else:
-                embed.add_field(
-                    name="",
-                    value=f"{chan[0]}: {chan[1]}\n", inline=False
-                )
+                others += f"{chan[0]}: {chan[1]}\n"
+        if channels:
+            embed.add_field(
+                name="Channels",
+                value=f"{channels}", inline=True
+            )
+        if roles:
+            embed.add_field(
+                name="Roles",
+                value=f"{roles}", inline=True
+            )
+        if punishment:
+            embed.add_field(
+                name="Punishment",
+                value=f"{punishment}", inline=True
+            )
+        if others:
+            embed.add_field(
+                name="Others",
+                value=f"{others}", inline=True
+            )
+
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
