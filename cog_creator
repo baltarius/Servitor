@@ -1,0 +1,157 @@
+# cog_creator.py
+"""
+Small code with inputs to create a cog's
+frame compatible with the rest of the bot
+
+Author: elcoyote solitaire
+"""
+cog_name = input("What name for the cog?")
+cog_description = input("Short description for the cog.")
+asyncio_lib = input("Do you need asyncio? Y/N")
+datetime_lib = input("Do you need date/time/timestamp? Y/N")
+database_lib = input("Do you need access to a database? Y/N")
+if database_lib.lower() == "y":
+    database_name = input("What name for the database?")
+    database_tables = []
+    while True:
+        database_tables.append(input("What names for the tables?"))
+        another_table = input("Do you need another table? Y/N")
+        if another_table.lower() != "y":
+            break
+    database_tables_sets = {}
+    for table in database_tables:
+        database_tables_sets[table] = []
+        while True:
+            col_name = input(f"What data for the table '{table}'?")
+            col_type = input(f"What type for the {col_name} (INTEGER, TEXT)?")
+            database_tables_sets[table].append((col_name, col_type.upper()))
+            next_data = input(f"Do you need another data for {table}? Y/N")
+            if next_data.lower() != "y":
+                break
+slash_command = input("Do you need /command ? Y/N")
+if slash_command.lower() == "y":
+    slash_commands = []
+    while True:
+        slash_commands.append(input("What name for the command?"))
+        next_command = input("Do you need another command? Y/N")
+        if next_command.lower() != "y":
+            break
+task_loop = input("Do you need task loop? Y/N")
+if task_loop.lower() == "y":
+    task_loop_name = input("What name for the loop?")
+    task_loop_interval = input("What interval? I.E: every hour = 'hours=1'")
+group_command = input("Do you need a group of commands? Y/N")
+if group_command.lower() == "y":
+    group_commands = []
+    while True:
+        group_commands.append(input("What name for the group of commands?"))
+        next_group = input("Do you need another group of commands? Y/N")
+        if next_group.lower() != "y":
+            break
+imports = set()
+if asyncio_lib.lower() == "y" or task_loop.lower() == "y":
+    imports.add("import asyncio")
+if database_lib.lower() == "y":
+    imports.add("import sqlite3")
+imports.add("import discord")
+if datetime_lib.lower() == "y":
+    imports.add("from datetime import datetime")
+if slash_command.lower() == "y":
+    imports.add("from discord import app_commands, Interaction")
+if task_loop.lower() == "y":
+    imports.add("from discord.ext import commands, tasks")
+if group_command.lower() != "n":
+    imports.add("from discord.app_commands import Group")
+lines = []
+lines.append(f'# {cog_name}')
+lines.append('"""')
+lines.append(cog_description)
+lines.append("")
+lines.append("Author: elcoyote solitaire")
+lines.append('"""')
+lines.extend(imports)
+for extra_line in range(2):
+    lines.append("")
+lines.append(f'class {cog_name.capitalize()}(commands.cog, name="{cog_name.lower()}"):')
+lines.append('    """')
+lines.append(f"    Class of the cog {cog_name}")
+if slash_command.lower() == "y":
+    lines.append("")
+    lines.append("    Command:")
+    for command in slash_commands:
+        lines.append(f"        /{command}")
+if group_command.lower() == "y":
+    for group in group_commands:
+        lines.append(f"        Group {group}")
+lines.append('    """')
+lines.append("    def __init__(self, bot):")
+lines.append("        self.bot = bot")
+lines.append("")
+lines.append("")
+if task_loop.lower() == "y":
+    lines.append("    async def after_on_ready(self):")
+    lines.append('        """')
+    lines.append(f"        Called after the bot is ready to start {task_loop_name}'s loop.")
+    lines.append('        """')
+    lines.append("    await self.bot.wait_until_ready()")
+    lines.append(f"    self.{task_loop_name}.start()")
+    lines.append("")
+    lines.append("")
+    lines.append("    async def cog_load(self):")
+    lines.append('        """')
+    lines.append("        Ensures data is loaded after the cog is ready.")
+    lines.append('        """')
+    lines.append("        asyncio.create_task(self.after_on_ready())")
+    lines.append("")
+    lines.append("")
+    lines.append("    async def cog_unload(self):")
+    lines.append('        """')
+    lines.append("        Stops check_reddit_posts task upon unloading the cog")
+    lines.append('        """')
+    lines.append(f"        self.{task_loop_name}.cancel()")
+    lines.append("")
+    lines.append("")
+    lines.append(f"    @tasks.loop({task_loop_interval}")
+    lines.append(f"    async def {task_loop_name}(self):")
+    lines.append("        print('Loop running')")
+    lines.append("")
+    lines.append("")
+if database_lib.lower() == "y":
+    lines.append("    async def get_database(self):")
+    lines.append(f"        conn = sqlite3.connect('{database_name}.db')")
+    lines.append("        cur = conn.cursor()")
+    for table, columns in database_tables_sets.items():
+        cols = ", ".join([f"{name} {ctype}" for name, ctype in columns])
+        lines.append("        cur.execute('''")
+        lines.append(f"            CREATE TABLE IF NOT EXISTS {table} ({cols})")
+        lines.append("        ''')")
+    lines.append("        conn.commit()")
+    lines.append("        return conn, cur")
+    lines.append("")
+    lines.append("")
+if slash_command.lower() == "y":
+    for command in slash_commands:
+        lines.append(f"    @app_commands.command(name='{command}', description='Command {command}')")
+        lines.append("    @app_commands.describe() # Add the descriptions for extra input of arguments")
+        lines.append(f"    async def {command}(self, interaction: Interaction):")
+        lines.append('        """')
+        lines.append(f"        This is the super command /{command}")
+        lines.append('        """')
+        lines.append("        # Write here what you want it to do")
+        lines.append("")
+        lines.append("")
+if group_command.lower() == "y":
+    for group in group_commands:
+        lines.append(f'    {group.lower()}_group = Group(name="{group.lower()}", description="Group of command for {group}", guild_only=True)')
+        lines.append("")
+        lines.append("")
+lines.append("")
+lines.append("async def setup(bot):")
+lines.append('    """')
+lines.append("    Loads the cog on start.")
+lines.append('    """')
+lines.append(f"    await bot.add_cog({cog_name.capitalize()}(bot))")
+lines.append("")
+
+with open(f"{cog_name}.py", "w", encoding="utf-8") as f:
+    f.write("\n".join(lines))
