@@ -118,7 +118,7 @@ if task_loop.lower() == "y":
     lines.append("")
 if database_lib.lower() == "y":
     lines.append("    async def get_database(self):")
-    lines.append(f"        conn = sqlite3.connect('{database_name}.db')")
+    lines.append(f"        conn = sqlite3.connect('./database/{database_name}.db')")
     lines.append("        cur = conn.cursor()")
     for table, columns in database_tables_sets.items():
         cols = ", ".join([f"{name} {ctype}" for name, ctype in columns])
